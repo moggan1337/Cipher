@@ -639,6 +639,109 @@ pytest tests/ -v
 python -m benchmarks.benchmark
 ```
 
+### Code Style
+
+- Follow PEP 8 guidelines
+- Use type hints where possible
+- Add docstrings for all public functions
+- Keep functions focused and small
+
+### Testing Guidelines
+
+- All new features must have tests
+- Maintain test coverage above 80%
+- Use descriptive test names
+
+---
+
+## Advanced Topics
+
+### Bootstrapping Strategies
+
+Bootstrapping is essential for deep computations. Strategies include:
+
+1. **Automatic Bootstrapping**: Trigger when depth runs low
+2. **Scheduled Bootstrapping**: Bootstrap every N levels
+3. **Opportunistic**: Bootstrap only when accuracy degrades
+
+```python
+# Automatic approach
+bootstrapped = context.ensure_depth(ct, min_depth=2)
+
+# Scheduled approach
+if ct.level <= threshold:
+    ct = context.bootstrap(ct)
+```
+
+### Optimizing Performance
+
+1. **Batch Processing**: Use SIMD slots for multiple inputs
+2. **Level Management**: Minimize unnecessary multiplications
+3. **Polynomial Degree**: Match activation approximation to needs
+4. **Bootstrapping Frequency**: Balance between depth and speed
+
+### Noise Management
+
+Noise accumulates with each operation. Monitor:
+
+```python
+# Check remaining precision
+available_depth = context.params.max_depth - ct.level
+print(f"Available depth: {available_depth}")
+
+# Rescale to reduce noise
+ct = context.rescale(ct)
+```
+
+### Security vs. Performance Tradeoffs
+
+| Parameter | Higher Security | Higher Performance |
+|-----------|---------------|-------------------|
+| N (degree) | Larger N | Smaller N |
+| Modulus | Larger q | Smaller q |
+| Bootstrapping | More frequent | Less frequent |
+
+---
+
+## FAQ
+
+### Q: How does Cipher compare to SEAL/PALISADE?
+
+Cipher is a Python framework focused on ML use cases, while SEAL (C++) and PALISADE (C++) are lower-level cryptographic libraries. Cipher prioritizes ease of use and ML-specific optimizations.
+
+### Q: Can I use pre-trained PyTorch models?
+
+Yes! Use the `convert_from_torch` function:
+
+```python
+from src.ml.encrypted_model import convert_from_torch
+import torch.nn as nn
+
+torch_model = nn.Sequential(
+    nn.Linear(784, 256),
+    nn.ReLU(),
+    nn.Linear(256, 10)
+)
+
+enc_model = convert_from_torch(torch_model, (784,), context)
+```
+
+### Q: How accurate are polynomial approximations?
+
+Accuracy depends on polynomial degree:
+
+| Degree | Typical Error |
+|--------|---------------|
+| 3 | ~5-10% |
+| 5 | ~1-2% |
+| 7 | ~0.1-0.5% |
+| 11 | <0.1% |
+
+### Q: What's the maximum computation depth?
+
+Without bootstrapping: ~20-30 levels (depends on parameters)
+With bootstrapping: Unlimited (at cost of computation time)
+
 ---
 
 ## References
@@ -653,11 +756,35 @@ python -m benchmarks.benchmark
 
 5. **McMahan et al. (2017)**: "Communication-Efficient Learning of Deep Networks from Decentralized Data." FedAvg paper.
 
+6. **Cheon et al. (2019)**: "Bootstrapping for HEAAN." EUROCRYPT 2018.
+
+7. **Halevi & Shoup (2018)**: "Design and Implementation of HEAAN." IACR Cryptology ePrint Archive.
+
 ---
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2026 Cipher Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ---
 
@@ -667,6 +794,8 @@ This project builds on the foundational work of:
 - The CKKS authors (Cheon, Kim, Kim, Song)
 - The homomorphic encryption community
 - Open-source implementations like SEAL and PALISADE
+- The federated learning pioneers (McMahan, Bonawitz, et al.)
+- The differential privacy community (Dwork, Roth, et al.)
 
 ---
 
