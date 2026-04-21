@@ -15,6 +15,24 @@
 
 ---
 
+## 🎬 Demo
+![Cipher Demo](demo.gif)
+
+*Homomorphic encryption operations on encrypted data*
+
+## Screenshots
+| Component | Preview |
+|-----------|---------|
+| Encrypted Computation | ![compute](screenshots/encrypted-compute.png) |
+| Key Management | ![keys](screenshots/key-mgmt.png) |
+| Performance Metrics | ![perf](screenshots/performance.png) |
+
+## Visual Description
+Cipher displays encrypted tensors being processed without decryption. Key management shows key pairs with generation progress. Performance metrics compare encrypted vs plaintext operation latencies.
+
+---
+
+
 ## Table of Contents
 
 1. [Introduction](#introduction)
